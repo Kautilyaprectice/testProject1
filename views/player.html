@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Players</title>
+</head>
+<body>
+    <h1>Player Information</h1>
+    <form onsubmit="handleForm(event)" action="/player/add" method="POST" id="itemForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        <label for="dob">Date of birth:</label>
+        <input type="text" id="dob" name="dob" required><br><br>
+        <label for="photourl">Photo Url:</label>
+        <input type="text" id="photourl" name="photourl" required><br><br>
+        <label for="birthplace">Birth place:</label>
+        <input type="text" id="birthplace" name="birthplace" required><br><br>
+        <label for="career">Career:</label>
+        <textarea id="career" name="career" required></textarea><br><br>
+        <label for="noofmatches">Number of matches:</label>
+        <input type="number" id="noofmatches" name="noofmatches" min="0" required><br><br>
+        <label for="score">Score:</label>
+        <input type="number" id="score" name="score" min="0" required><br><br>
+        <label for="fifties">Fifties:</label>
+        <input type="number" id="fifties" name="fifties" min="0" required><br><br>
+        <label for="centuries">Centuries:</label>
+        <input type="number" id="centuries" name="centuries" min="0" required><br><br>
+        <label for="wickets">Wickets:</label>
+        <input type="number" id="wickets" name="wickets" min="0" required><br><br>
+        <label for="average">Average:</label>
+        <input type="number" id="average" name="average" min="0" required><br><br>
+        <button type="submit">Submit</button>
+    </form>
+    <br><br>
+    <hr>
+    <div>
+        <input type="text" id="searchInput">
+        <button type="button" onclick="searchPlayer()">Search</button>
+    </div>
+    <div id="playerDetails"></div> 
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"></script>
+<script>
+    function handleForm(event) {
+        event.preventDefault();
+        const name = document.getElementById('name').value;
+        const dob = document.getElementById('dob').value;
+        const photourl = document.getElementById('photourl').value;
+        const birthplace = document.getElementById('birthplace').value;
+        const career = document.getElementById('career').value;
+        const noofmatches = document.getElementById('noofmatches').value;
+        const score = document.getElementById('score').value;
+        const fifties = document.getElementById('fifties').value;
+        const centuries = document.getElementById('centuries').value;
+        const wickets = document.getElementById('wickets').value;
+        const average = document.getElementById('average').value;
+
+        const playerData = {
+            name: name,
+            dob: dob,
+            photourl: photourl,
+            birthplace: birthplace,
+            career: career,
+            noofmatches: noofmatches,
+            score: score,
+            fifties: fifties,
+            centuries: centuries,
+            wickets: wickets,
+            average: average
+        };
+
+        axios.post('/player', playerData)
+            .then(response => {
+                console.log(response.data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        
+        document.getElementById('name').value = '';
+        document.getElementById('dob').value = '';
+        document.getElementById('photourl').value = '';
+        document.getElementById('birthplace').value = '';
+        document.getElementById('career').value = '';
+        document.getElementById('noofmatches').value = '';
+        document.getElementById('score').value = '';
+        document.getElementById('fifties').value = '';
+        document.getElementById('centuries').value = '';
+        document.getElementById('wickets').value = '';
+        document.getElementById('average').value = '';
+    }
+
+    function searchPlayer() {
+        const searchInput = document.getElementById('searchInput').value;
+        axios.get(`/player/${searchInput}`)
+            .then(response => {
+                const player = response.data;
+                const playerDetailsDiv = document.getElementById('playerDetails');
+                playerDetailsDiv.innerHTML = `
+                    <h2>Player Details:</h2>
+                    <p>Name: ${player.name}</p>
+                    <p>Date of Birth: ${player.dob}</p>
+                    <p>Career: ${player.career}</p>
+                    <p>No of matches: ${player.noofmatches}</p>
+                    <p>Score: ${player.score}</p>
+                    <p>Fifties: ${player.fifties}</p>
+                    <p>Centuries: ${player.centuries}</p>
+                    <p>Wickets: ${player.wickets}</p>
+                    <p>Average: ${player.average}</p>
+                    <button onclick="editPlayer('${player.id}')">Edit Player</button>
+                `;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function editPlayer(playerId) {
+        axios.get(`/player/${playerId}`)
+            .then(response => {
+                const player = response.data;
+                const editForm = `
+                    <h2>Edit Player</h2>
+                    <form onsubmit="updatePlayer(event, '${player.id}')">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" value="${player.name}" required><br><br>
+                        <label for="dob">Date of Birth:</label>
+                        <input type="text" id="dob" name="dob" value="${player.dob}" required><br><br>
+                        <label for="photourl">Photo Url:</label>
+                        <input type="text" id="photourl" name="photourl" value="${player.photourl}" required><br><br>
+                        <label for="birthplace">Birth place:</label>
+                        <input type="text" id="birthplace" name="birthplace" value="${player.birthplace}" required><br><br>
+                        <label for="career">Career:</label>
+                        <textarea id="career" name="career" required>${player.career}</textarea><br><br>
+                        <label for="noofmatches">Number of matches:</label>
+                        <input type="number" id="noofmatches" name="noofmatches" min="0" value="${player.noofmatches}" required><br><br>
+                        <label for="score">Score:</label>
+                        <input type="number" id="score" name="score" min="0" value="${player.score}" required><br><br>
+                        <label for="fifties">Fifties:</label>
+                        <input type="number" id="fifties" name="fifties" min="0" value="${player.fifties}" required><br><br>
+                        <label for="centuries">Centuries:</label>
+                        <input type="number" id="centuries" name="centuries" min="0" value="${player.centuries}" required><br><br>
+                        <label for="wickets">Wickets:</label>
+                        <input type="number" id="wickets" name="wickets" min="0" value="${player.wickets}" required><br><br>
+                        <label for="average">Average:</label>
+                        <input type="number" id="average" name="average" min="0" value="${player.average}" required><br><br>
+                        <button type="submit">Update</button>
+                    </form>
+                `;
+                const playerDetailsDiv = document.getElementById('playerDetails');
+                playerDetailsDiv.innerHTML = editForm;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function updatePlayer(event, playerId) {
+        event.preventDefault();
+        const name = document.getElementById('name').value;
+        const dob = document.getElementById('dob').value;
+        const photourl = document.getElementById('photourl').value;
+        const birthplace = document.getElementById('birthplace').value;
+        const career = document.getElementById('career').value;
+        const noofmatches = document.getElementById('noofmatches').value;
+        const score = document.getElementById('score').value;
+        const fifties = document.getElementById('fifties').value;
+        const centuries = document.getElementById('centuries').value;
+        const wickets = document.getElementById('wickets').value;
+        const average = document.getElementById('average').value;
+
+        const updatedPlayer = {
+            name: name,
+            dob: dob,
+            photourl: photourl,
+            birthplace: birthplace,
+            career: career,
+            noofmatches: noofmatches,
+            score: score,
+            fifties: fifties,
+            centuries: centuries,
+            wickets: wickets,
+            average: average
+        };
+
+        axios.put(`/player/${playerId}`, updatedPlayer)
+            .then(response => {
+                console.log('Player updated successfully:', response.data);
+                searchPlayer();
+            })
+            .catch(error => {
+                console.error('Error updating player:', error);
+            });
+    }
+</script>
+</html>
